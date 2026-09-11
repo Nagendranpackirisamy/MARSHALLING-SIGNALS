@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f487c0d90e83e9a4e983b097cb00b29d, type: 3}
+  m_Name: Scenario_
+  m_EditorClassIdentifier: Assembly-CSharp::ScenarioData
+  scenarioId: 
+  context: 0
+  requiresAnswer: 1
+  pageType: 1
+  playVideo: 0
+  videoClip: {fileID: 0}
+  pauseOnLastFrame: 1
+  showContinueButton: 1
+  autoContinue: 0
+  allowSkip: 0
+  signalVisualType: 1
+  lightColor: 0
+  lightPattern: 0
+  questionText: 
+  optionA: 
+  optionB: 
+  correctOptionIndex: 0
+  instructorIntroLine: 
+  instructorCorrectLine: 
+  instructorWrongLine: 
+  introVO: {fileID: 0}
+  correctVO: {fileID: 0}
+  wrongVO: {fileID: 0}
+  correctAnimTrigger: 
+  correctAnimClip: {fileID: 0}
+  wrongAnimTrigger: 
+  wrongAnimClip: {fileID: 0}
+  aircraftAnchor: {fileID: 0}

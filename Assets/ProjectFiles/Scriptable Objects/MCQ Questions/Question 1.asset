@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d01fd2d64a9249049aaa77d5c12a82fe, type: 3}
   m_Name: Question 1
   m_EditorClassIdentifier: 
-  questionText: Which of the given reagents is used to prevent the hydrolysis of
-    Al3+ ions?
+  questionText: Identify the signal shown below.
   referenceImage: {fileID: 0}
   explanationText: Dilute sulphuric acid is an acid that is added to the reaction
     mixture to prevent the hydrolysis of aluminium ions.Distilled water can not be
@@ -21,7 +20,7 @@ MonoBehaviour:
     wash the crystals, and can not be used to prevent the hydrolysis of aluminum
     ions.
   options:
-  - Distilled water
+  - Negative  Chocks Removed  Do Not Touch Controls  Hold Position / Stand-by
   - Dilute sulphuric acid
   - 1:1 water + alcohol mixture
   - None of these

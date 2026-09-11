@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 
@@ -9,7 +10,7 @@ public class PageNavigationController : MonoBehaviour
     [System.Serializable]
     public class PageRule
     {
-        [Tooltip("If true, requires interaction to unlock the NEXT button.")]
+        [Tooltip("If true, requires interaction to unlock the NEXT buttons.")]
         public bool requiresInteraction = false;
 
         [Tooltip("If true, locks BOTH Next and Previous buttons until EnableNavigationButtons() / RequestNavigationUnlock() is called.")]
@@ -17,8 +18,14 @@ public class PageNavigationController : MonoBehaviour
     }
 
     [Header("Navigation Buttons")]
-    [SerializeField] private Button nextButton;
+    [SerializeField] private Button[] nextButtons;
     [SerializeField] private Button previousButton;
+
+    [Header("Continuous Pop Animation")]
+    [Tooltip("If true, pulses/pops the next buttons continuously until clicked.")]
+    [SerializeField] private bool popNextButtonOnUnlock = true;
+    [SerializeField] private float popScaleMultiplier = 1.2f;
+    [SerializeField] private float popPulseSpeed = 4f;
 
     [Header("Page Display")]
     [SerializeField] private TMP_Text pageNumberText;
@@ -47,6 +54,9 @@ public class PageNavigationController : MonoBehaviour
     // Runtime State
     private readonly HashSet<int> visitedPages = new();
     private readonly HashSet<int> completedPages = new();
+    private readonly Dictionary<Transform, Vector3> defaultScales = new();
+
+    private Coroutine continuousPopCoroutine;
 
     private int NavigationPageCount => Mathf.Max(1, requiresInteraction.Count);
 
@@ -54,6 +64,18 @@ public class PageNavigationController : MonoBehaviour
     {
         Instance = this;
         currentIndex = Mathf.Clamp(currentIndex, 0, NavigationPageCount - 1);
+
+        // Store original scales for all next buttons
+        if (nextButtons != null)
+        {
+            foreach (Button btn in nextButtons)
+            {
+                if (btn != null && !defaultScales.ContainsKey(btn.transform))
+                {
+                    defaultScales[btn.transform] = btn.transform.localScale;
+                }
+            }
+        }
     }
 
     private void OnEnable()
@@ -63,8 +85,7 @@ public class PageNavigationController : MonoBehaviour
 
     private void Start()
     {
-        if (nextButton)
-            nextButton.onClick.AddListener(NextPage);
+        BindNextButtons();
 
         if (previousButton)
             previousButton.onClick.AddListener(PreviousPage);
@@ -79,12 +100,12 @@ public class PageNavigationController : MonoBehaviour
     private void OnDisable()
     {
         OnNavigationUnlockRequested -= EnableNavigationButtons;
+        StopContinuousPopAnimation();
     }
 
     private void OnDestroy()
     {
-        if (nextButton)
-            nextButton.onClick.RemoveListener(NextPage);
+        UnbindNextButtons();
 
         if (previousButton)
             previousButton.onClick.RemoveListener(PreviousPage);
@@ -93,10 +114,40 @@ public class PageNavigationController : MonoBehaviour
             Instance = null;
     }
 
+    private void BindNextButtons()
+    {
+        if (nextButtons == null) return;
+
+        foreach (Button btn in nextButtons)
+        {
+            if (btn != null)
+            {
+                btn.onClick.AddListener(NextPage);
+            }
+        }
+    }
+
+    private void UnbindNextButtons()
+    {
+        if (nextButtons == null) return;
+
+        foreach (Button btn in nextButtons)
+        {
+            if (btn != null)
+            {
+                btn.onClick.RemoveListener(NextPage);
+            }
+        }
+    }
+
     public void NextPage()
     {
         if (currentIndex >= NavigationPageCount - 1)
             return;
+
+        // Stop pulsing and disable all next buttons immediately upon click
+        StopContinuousPopAnimation();
+        SetNextButtonsState(false);
 
         currentIndex++;
 
@@ -112,6 +163,7 @@ public class PageNavigationController : MonoBehaviour
         if (currentIndex <= 0)
             return;
 
+        StopContinuousPopAnimation();
         currentIndex--;
 
         visitedPages.Add(currentIndex);
@@ -137,14 +189,14 @@ public class PageNavigationController : MonoBehaviour
 
         bool isCompleted = completedPages.Contains(currentIndex);
 
-        // Check manual page lock boolean directly under existing interaction settings
+        // Check manual page lock
         bool isPageLocked = currentIndex < lockNavigationTillUnlocked.Count && lockNavigationTillUnlocked[currentIndex];
 
-        // If manual page lock is enabled for THIS specific page, block both buttons until unlocked
         if (isPageLocked && !isCompleted)
         {
             if (previousButton) previousButton.interactable = false;
-            if (nextButton) nextButton.interactable = false;
+            SetNextButtonsState(false);
+            StopContinuousPopAnimation();
             return;
         }
 
@@ -152,20 +204,34 @@ public class PageNavigationController : MonoBehaviour
             currentIndex < requiresInteraction.Count &&
             requiresInteraction[currentIndex];
 
-        // Previous behaves normally
+        // Previous button
         if (previousButton)
             previousButton.interactable = currentIndex > 0;
 
-        // Next
-        if (nextButton)
+        // Next buttons
+        bool canAdvance = !needsInteraction || isCompleted;
+        SetNextButtonsState(canAdvance);
+
+        // Run or stop pulsing depending on interactability
+        if (canAdvance && popNextButtonOnUnlock)
         {
-            if (!needsInteraction)
+            StartContinuousPopAnimation();
+        }
+        else
+        {
+            StopContinuousPopAnimation();
+        }
+    }
+
+    private void SetNextButtonsState(bool isInteractable)
+    {
+        if (nextButtons == null) return;
+
+        foreach (Button btn in nextButtons)
+        {
+            if (btn != null)
             {
-                nextButton.interactable = true;
-            }
-            else
-            {
-                nextButton.interactable = isCompleted;
+                btn.interactable = isInteractable;
             }
         }
     }
@@ -175,13 +241,11 @@ public class PageNavigationController : MonoBehaviour
         if (previousButton)
             previousButton.interactable = currentIndex > 0;
 
-        if (nextButton)
-            nextButton.interactable = true;
+        SetNextButtonsState(true);
     }
 
     /// <summary>
-    /// Called by the existing event.
-    /// Marks the current page as completed, then refreshes navigation.
+    /// Unlocks navigation, activates next buttons, and starts looping pop animation.
     /// </summary>
     public void EnableNavigationButtons()
     {
@@ -189,19 +253,66 @@ public class PageNavigationController : MonoBehaviour
         UpdateButtons();
     }
 
-    /// <summary>
-    /// Existing API. No dependent scripts need to change.
-    /// </summary>
     public static void RequestNavigationUnlock()
     {
         OnNavigationUnlockRequested?.Invoke();
     }
 
-    /// <summary>
-    /// Updates the page number display.
-    /// Developer Mode ON  : 0/17, 1/17, ..., 16/17
-    /// Developer Mode OFF : 1/17, 2/17, ..., 17/17
-    /// </summary>
+    // --- Continuous Pop Logic ---
+
+    private void StartContinuousPopAnimation()
+    {
+        if (continuousPopCoroutine != null) return;
+        continuousPopCoroutine = StartCoroutine(ContinuousPopRoutine());
+    }
+
+    private void StopContinuousPopAnimation()
+    {
+        if (continuousPopCoroutine != null)
+        {
+            StopCoroutine(continuousPopCoroutine);
+            continuousPopCoroutine = null;
+        }
+
+        // Reset scales back to cached originals
+        if (nextButtons != null)
+        {
+            foreach (Button btn in nextButtons)
+            {
+                if (btn != null && defaultScales.TryGetValue(btn.transform, out Vector3 originalScale))
+                {
+                    btn.transform.localScale = originalScale;
+                }
+            }
+        }
+    }
+
+    private IEnumerator ContinuousPopRoutine()
+    {
+        float timer = 0f;
+
+        while (true)
+        {
+            timer += Time.unscaledDeltaTime * popPulseSpeed;
+
+            // Ping-pong scale wave between 1.0 and popScaleMultiplier
+            float wave = (Mathf.Sin(timer) + 1f) * 0.5f;
+
+            if (nextButtons != null)
+            {
+                foreach (Button btn in nextButtons)
+                {
+                    if (btn != null && btn.gameObject.activeInHierarchy && defaultScales.TryGetValue(btn.transform, out Vector3 originalScale))
+                    {
+                        btn.transform.localScale = Vector3.Lerp(originalScale, originalScale * popScaleMultiplier, wave);
+                    }
+                }
+            }
+
+            yield return null;
+        }
+    }
+
     private void UpdateDisplay()
     {
         if (!pageNumberText)
@@ -214,15 +325,6 @@ public class PageNavigationController : MonoBehaviour
         pageNumberText.text = $"{displayedPage}/{NavigationPageCount}";
     }
 
-    // Optional helper methods
-
-    public bool IsPageVisited(int pageIndex)
-    {
-        return visitedPages.Contains(pageIndex);
-    }
-
-    public bool IsPageCompleted(int pageIndex)
-    {
-        return completedPages.Contains(pageIndex);
-    }
+    public bool IsPageVisited(int pageIndex) => visitedPages.Contains(pageIndex);
+    public bool IsPageCompleted(int pageIndex) => completedPages.Contains(pageIndex);
 }
