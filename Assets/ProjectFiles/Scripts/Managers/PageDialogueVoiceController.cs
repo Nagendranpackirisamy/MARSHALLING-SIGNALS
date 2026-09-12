@@ -45,6 +45,12 @@ public class PageDialogueVoiceController : MonoBehaviour
 
         [Header("Target UI / GameObject")]
         public GameObject targetGameObject;
+
+        [Header("Optional Header / Title")]
+        public TMP_Text titleComponent;
+        public string titleContent;
+
+        [Header("Body Content")]
         public TMP_Text textComponent;
         [TextArea(3, 6)] public string textContent;
 
@@ -60,6 +66,9 @@ public class PageDialogueVoiceController : MonoBehaviour
         [Header("Voice-Over Settings")]
         public bool playVoiceOver = false;
         public AudioClip[] voiceClips;
+
+        [Tooltip("If true, automatically pops up the post-audio continue button when voice over ends. If false, trigger it via TriggerPostAudioContinue().")]
+        public bool showContinueButtonAfterAudio = true;
 
         [Header("Quiz Settings For This Page")]
         public bool hasQuiz = false;
@@ -118,6 +127,7 @@ public class PageDialogueVoiceController : MonoBehaviour
     private Coroutine currentAudioCoroutine;
     private Coroutine currentAnimCoroutine;
     private Coroutine feedbackCoroutine;
+    private Coroutine continueBtnAnimCoroutine;
 
     private int activePageIndex = -1;
     private readonly Dictionary<Transform, Vector3> defaultLocalPositions = new();
@@ -174,6 +184,22 @@ public class PageDialogueVoiceController : MonoBehaviour
             if (!defaultLocalScales.ContainsKey(qt))
                 defaultLocalScales[qt] = qt.localScale;
         }
+
+        if (feedbackPanel != null)
+        {
+            Transform ft = feedbackPanel.transform;
+            if (!defaultLocalPositions.ContainsKey(ft))
+                defaultLocalPositions[ft] = ft.localPosition;
+            if (!defaultLocalScales.ContainsKey(ft))
+                defaultLocalScales[ft] = ft.localScale;
+        }
+
+        if (postAudioContinueButton != null)
+        {
+            Transform bt = postAudioContinueButton.transform;
+            if (!defaultLocalScales.ContainsKey(bt))
+                defaultLocalScales[bt] = bt.localScale;
+        }
     }
 
     private void OnEnable()
@@ -212,6 +238,7 @@ public class PageDialogueVoiceController : MonoBehaviour
 
         PageContentConfig config = pages[newPageIndex];
 
+        // 1. Activate & Animate Page UI GameObject
         if (config.targetGameObject != null)
         {
             config.targetGameObject.SetActive(true);
@@ -227,6 +254,13 @@ public class PageDialogueVoiceController : MonoBehaviour
             }
         }
 
+        // 2. Set Optional Title Header
+        if (config.titleComponent != null)
+        {
+            config.titleComponent.text = config.titleContent ?? "";
+        }
+
+        // 3. Typewriter vs Instant Body Text
         if (config.textComponent != null)
         {
             if (config.useTypewriterEffect)
@@ -239,6 +273,7 @@ public class PageDialogueVoiceController : MonoBehaviour
             }
         }
 
+        // 4. Audio Handling
         if (config.playVoiceOver && config.voiceClips != null && config.voiceClips.Length > 0)
         {
             currentAudioCoroutine = StartCoroutine(SequentialAudioRoutine(newPageIndex, config));
@@ -254,9 +289,23 @@ public class PageDialogueVoiceController : MonoBehaviour
         config.onAllVoiceClipsEnded?.Invoke();
         OnPageVoiceSequenceFinished?.Invoke(pageIndex);
 
+        if (config.showContinueButtonAfterAudio)
+        {
+            TriggerPostAudioContinue();
+        }
+    }
+
+    public void TriggerPostAudioContinue()
+    {
         if (postAudioContinueButton != null)
         {
             postAudioContinueButton.gameObject.SetActive(true);
+            PlayPopSound();
+
+            if (continueBtnAnimCoroutine != null)
+                StopCoroutine(continueBtnAnimCoroutine);
+
+            continueBtnAnimCoroutine = StartCoroutine(PopScaleRoutine(postAudioContinueButton.transform));
         }
         else
         {
@@ -328,25 +377,25 @@ public class PageDialogueVoiceController : MonoBehaviour
         if (feedbackCoroutine != null)
             StopCoroutine(feedbackCoroutine);
 
-        feedbackCoroutine = StartCoroutine(FeedbackRoutine(selectedOption, config.quizData));
+        feedbackCoroutine = StartCoroutine(FeedbackRoutine(selectedOption, config.quizData, config.popOrigin));
     }
 
-    private IEnumerator FeedbackRoutine(QuizOption option, QuizData quizData)
+    private IEnumerator FeedbackRoutine(QuizOption option, QuizData quizData, UIPopOrigin origin)
     {
         if (feedbackPanel == null) yield break;
+
+        if (quizContainer != null)
+            quizContainer.SetActive(false);
 
         feedbackPanel.SetActive(true);
 
         if (option.isCorrect)
-        {
             PlaySound(correctSound);
-        }
         else
-        {
             PlaySound(wrongSound);
-        }
 
-        // Set Title text (fallback to global defaults if empty)
+        currentAnimCoroutine = StartCoroutine(AnimatePopRoutine(feedbackPanel.transform, origin));
+
         if (feedbackTitleText != null)
         {
             if (option.isCorrect)
@@ -363,7 +412,6 @@ public class PageDialogueVoiceController : MonoBehaviour
             }
         }
 
-        // Set Explanation text
         if (feedbackExplanationText != null)
         {
             feedbackExplanationText.text = option.isCorrect
@@ -376,7 +424,10 @@ public class PageDialogueVoiceController : MonoBehaviour
             SetOptionButtonsInteractable(false);
 
             if (postQuizContinueButton != null)
+            {
                 postQuizContinueButton.gameObject.SetActive(true);
+                StartCoroutine(PopScaleRoutine(postQuizContinueButton.transform));
+            }
         }
         else
         {
@@ -385,6 +436,13 @@ public class PageDialogueVoiceController : MonoBehaviour
             yield return new WaitForSeconds(3.0f);
 
             feedbackPanel.SetActive(false);
+
+            if (quizContainer != null)
+            {
+                quizContainer.SetActive(true);
+                currentAnimCoroutine = StartCoroutine(AnimatePopRoutine(quizContainer.transform, origin));
+            }
+
             SetOptionButtonsInteractable(true);
         }
 
@@ -408,22 +466,13 @@ public class PageDialogueVoiceController : MonoBehaviour
         }
     }
 
-    // --- Audio Helpers ---
-
-    private void PlayPopSound()
-    {
-        PlaySound(uiPopSound);
-    }
+    private void PlayPopSound() => PlaySound(uiPopSound);
 
     private void PlaySound(AudioClip clip)
     {
         if (sfxAudioSource != null && clip != null)
-        {
             sfxAudioSource.PlayOneShot(clip);
-        }
     }
-
-    // --- UI Animations ---
 
     private IEnumerator AnimatePopRoutine(Transform target, UIPopOrigin origin)
     {
@@ -467,6 +516,23 @@ public class PageDialogueVoiceController : MonoBehaviour
         currentAnimCoroutine = null;
     }
 
+    private IEnumerator PopScaleRoutine(Transform target)
+    {
+        Vector3 finalScale = defaultLocalScales.ContainsKey(target) ? defaultLocalScales[target] : target.localScale;
+        target.localScale = Vector3.zero;
+
+        float elapsed = 0f;
+        while (elapsed < animationDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, elapsed / animationDuration);
+            target.localScale = Vector3.Lerp(Vector3.zero, finalScale, t);
+            yield return null;
+        }
+
+        target.localScale = finalScale;
+    }
+
     private void ResetTransform(Transform target)
     {
         if (defaultLocalPositions.TryGetValue(target, out Vector3 pos))
@@ -475,8 +541,6 @@ public class PageDialogueVoiceController : MonoBehaviour
         if (defaultLocalScales.TryGetValue(target, out Vector3 scale))
             target.localScale = scale;
     }
-
-    // --- Typewriter & Voice ---
 
     private IEnumerator TypewriterRoutine(TMP_Text targetText, string fullText, float delay)
     {
@@ -530,6 +594,7 @@ public class PageDialogueVoiceController : MonoBehaviour
         if (currentAudioCoroutine != null) { StopCoroutine(currentAudioCoroutine); currentAudioCoroutine = null; }
         if (currentAnimCoroutine != null) { StopCoroutine(currentAnimCoroutine); currentAnimCoroutine = null; }
         if (feedbackCoroutine != null) { StopCoroutine(feedbackCoroutine); feedbackCoroutine = null; }
+        if (continueBtnAnimCoroutine != null) { StopCoroutine(continueBtnAnimCoroutine); continueBtnAnimCoroutine = null; }
 
         if (voiceAudioSource != null && voiceAudioSource.isPlaying) voiceAudioSource.Stop();
     }
