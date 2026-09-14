@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -122,6 +122,27 @@ public class PageDialogueVoiceController : MonoBehaviour
     [SerializeField] private Color incorrectColor = new Color(0.9f, 0.65f, 0.1f);
     [SerializeField] private Button postQuizContinueButton;
 
+    [Header("Results & Summary Screen (Final Page)")]
+    [Tooltip("Index of the final summary page in the Pages list.")]
+    [SerializeField] private int resultsPageIndex = 10;
+    [SerializeField] private TMP_Text scoreRevealText;
+    [SerializeField] private TMP_Text bestStreakText;
+    [SerializeField] private TMP_Text rankBadgeText;
+    [SerializeField] private TMP_Text passFailBannerText;
+    [SerializeField] private TMP_Text closingLineText;
+    [SerializeField] private Button tryAgainButton;
+    [SerializeField] private Button saveAndExitButton;
+
+    [Header("Scoring & Badges Settings")]
+    [SerializeField] private int pointsFirstTry = 10;
+    [SerializeField] private int pointsSecondTry = 5;
+    [SerializeField] private int pointsMultipleTries = 2;
+    [SerializeField] private int passingScoreThreshold = 70;
+
+    [Header("Try Again Navigation Callback")]
+    [Tooltip("Hook up PageNavigationController's page jump method here or let the script auto-detect it.")]
+    public UnityEvent onTryAgainRequested;
+
     [Header("Pages Configuration")]
     [SerializeField] private List<PageContentConfig> pages = new();
 
@@ -138,6 +159,12 @@ public class PageDialogueVoiceController : MonoBehaviour
     private int activePageIndex = -1;
     private readonly Dictionary<Transform, Vector3> defaultLocalPositions = new();
     private readonly Dictionary<Transform, Vector3> defaultLocalScales = new();
+
+    // Tracking Scores & Attempts
+    private readonly Dictionary<int, int> quizAttemptsPerPage = new();
+    private readonly Dictionary<int, int> quizScoreEarnedPerPage = new();
+    private int currentStreak = 0;
+    private int bestStreak = 0;
 
     private void Awake()
     {
@@ -157,6 +184,12 @@ public class PageDialogueVoiceController : MonoBehaviour
 
         if (postQuizContinueButton != null)
             postQuizContinueButton.onClick.AddListener(OnPostQuizContinueClicked);
+
+        if (tryAgainButton != null)
+            tryAgainButton.onClick.AddListener(OnTryAgainClicked);
+
+        if (saveAndExitButton != null)
+            saveAndExitButton.onClick.AddListener(OnSaveAndExitClicked);
 
         for (int i = 0; i < optionButtons.Length; i++)
         {
@@ -237,6 +270,12 @@ public class PageDialogueVoiceController : MonoBehaviour
         {
             if (pages[i].targetGameObject != null)
                 pages[i].targetGameObject.SetActive(false);
+        }
+
+        // Display results if entering the Summary page
+        if (newPageIndex == resultsPageIndex)
+        {
+            DisplayFinalResults();
         }
 
         if (newPageIndex < 0 || newPageIndex >= pages.Count)
@@ -332,7 +371,6 @@ public class PageDialogueVoiceController : MonoBehaviour
             if (config.targetGameObject != null)
                 config.targetGameObject.SetActive(false);
 
-            // Handle object visibility transitions on quiz arrival
             if (config.objectsToHideOnQuiz != null)
             {
                 foreach (GameObject obj in config.objectsToHideOnQuiz)
@@ -397,6 +435,12 @@ public class PageDialogueVoiceController : MonoBehaviour
 
         QuizOption selectedOption = config.quizData.options[optionIndex];
 
+        // Track attempts for this question
+        if (!quizAttemptsPerPage.ContainsKey(activePageIndex))
+            quizAttemptsPerPage[activePageIndex] = 0;
+
+        quizAttemptsPerPage[activePageIndex]++;
+
         if (feedbackCoroutine != null)
             StopCoroutine(feedbackCoroutine);
 
@@ -413,9 +457,40 @@ public class PageDialogueVoiceController : MonoBehaviour
         feedbackPanel.SetActive(true);
 
         if (option.isCorrect)
+        {
             PlaySound(correctSound);
+
+            // Calculate score for this question if not already scored
+            if (!quizScoreEarnedPerPage.ContainsKey(activePageIndex))
+            {
+                int attempts = quizAttemptsPerPage[activePageIndex];
+                int earned = 0;
+
+                if (attempts == 1)
+                {
+                    earned = pointsFirstTry;
+                    currentStreak++;
+                    if (currentStreak > bestStreak) bestStreak = currentStreak;
+                }
+                else if (attempts == 2)
+                {
+                    earned = pointsSecondTry;
+                    currentStreak = 0;
+                }
+                else
+                {
+                    earned = pointsMultipleTries;
+                    currentStreak = 0;
+                }
+
+                quizScoreEarnedPerPage[activePageIndex] = earned;
+            }
+        }
         else
+        {
             PlaySound(wrongSound);
+            currentStreak = 0;
+        }
 
         currentAnimCoroutine = StartCoroutine(AnimatePopRoutine(feedbackPanel.transform, origin));
 
@@ -478,6 +553,138 @@ public class PageDialogueVoiceController : MonoBehaviour
         if (quizContainer != null) quizContainer.SetActive(false);
 
         PageNavigationController.RequestNavigationUnlock();
+    }
+
+    // =========================================================
+    // RESULTS & SUMMARY CALCULATION
+    // =========================================================
+
+    public void DisplayFinalResults()
+    {
+        int totalScore = 0;
+        bool allFirstTry = true;
+        int quizCount = 0;
+
+        foreach (var page in pages)
+        {
+            if (page.hasQuiz)
+                quizCount++;
+        }
+
+        foreach (var entry in quizScoreEarnedPerPage)
+        {
+            totalScore += entry.Value;
+        }
+
+        foreach (var entry in quizAttemptsPerPage)
+        {
+            if (entry.Value > 1)
+            {
+                allFirstTry = false;
+                break;
+            }
+        }
+
+        if (quizAttemptsPerPage.Count < quizCount)
+            allFirstTry = false;
+
+        // 1. Score Headline
+        if (scoreRevealText != null)
+            scoreRevealText.text = $"{totalScore} <size=60%>/ 100</size>";
+
+        // 2. Best Streak
+        if (bestStreakText != null)
+            bestStreakText.text = $"Best streak: {bestStreak}";
+
+        // 3. Rank Badge Copy
+        if (rankBadgeText != null)
+        {
+            if (allFirstTry && totalScore >= 100)
+            {
+                rankBadgeText.text = "MASTER MARSHALLER — every signal, first try.";
+            }
+            else if (totalScore >= passingScoreThreshold)
+            {
+                rankBadgeText.text = "MARSHALLER — solid, confident signal reading.";
+            }
+            else
+            {
+                rankBadgeText.text = "TRAINEE — the basics are in, keep practising.";
+            }
+        }
+
+        // 4. Pass / Fail Banner
+        if (passFailBannerText != null)
+        {
+            if (totalScore >= passingScoreThreshold)
+            {
+                passFailBannerText.text = "✓ Passed — you can read the ramp like a pro.";
+                passFailBannerText.color = correctColor;
+            }
+            else
+            {
+                passFailBannerText.text = "Not quite there yet — but every signal you missed is one tap away in the Library.";
+                passFailBannerText.color = incorrectColor;
+            }
+        }
+
+        // 5. Closing Line (100% score only)
+        if (closingLineText != null)
+        {
+            if (totalScore >= 100 && allFirstTry)
+            {
+                closingLineText.gameObject.SetActive(true);
+                closingLineText.text = "Perfect run. Ten for ten — that's a real marshaller's eye.";
+            }
+            else
+            {
+                closingLineText.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    public void ResetAllQuizScores()
+    {
+        quizAttemptsPerPage.Clear();
+        quizScoreEarnedPerPage.Clear();
+        currentStreak = 0;
+        bestStreak = 0;
+    }
+
+    private void OnTryAgainClicked()
+    {
+        ResetAllQuizScores();
+
+        // 1. Fire Inspector event if hooked up
+        if (onTryAgainRequested != null && onTryAgainRequested.GetPersistentEventCount() > 0)
+        {
+            onTryAgainRequested.Invoke();
+            return;
+        }
+
+        // 2. Fallback: find PageNavigationController in scene
+#if UNITY_2023_1_OR_NEWER
+        PageNavigationController navController = UnityEngine.Object.FindFirstObjectByType<PageNavigationController>();
+#else
+        PageNavigationController navController = UnityEngine.Object.FindObjectOfType<PageNavigationController>();
+#endif
+        if (navController != null)
+        {
+            // Unlocks navigation and moves back to the beginning
+            PageNavigationController.RequestNavigationUnlock();
+            navController.SendMessage("GoToPage", 0, SendMessageOptions.DontRequireReceiver);
+            navController.SendMessage("SetPage", 0, SendMessageOptions.DontRequireReceiver);
+        }
+    }
+
+    private void OnSaveAndExitClicked()
+    {
+        Debug.Log("[PageDialogueVoiceController] Results Saved. Exiting application.");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 
     private void SetOptionButtonsInteractable(bool state)
