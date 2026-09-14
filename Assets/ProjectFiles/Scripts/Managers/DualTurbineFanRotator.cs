@@ -20,19 +20,22 @@ public class DualTurbineFanRotator : MonoBehaviour
     [Tooltip("Rotation axis relative to the fan blades.")]
     [SerializeField] private RotationAxis rotationAxis = RotationAxis.Z;
 
-    [Tooltip("Rotation speed in degrees per second.")]
+    [Tooltip("Target rotation speed in degrees per second at full throttle.")]
     [SerializeField] private float rotationSpeed = 1200f;
 
     [Tooltip("Invert direction if the fan spins backwards.")]
     [SerializeField] private bool reverseDirection = false;
 
     [Header("Auto Start")]
-    [Tooltip("If checked, the fans spin immediately on Play. If unchecked, wait until StartRotation() is called.")]
+    [Tooltip("If checked, the fans begin spinning on Play. If unchecked, wait until StartRotation() is called.")]
     [SerializeField] private bool rotateOnStart = true;
 
-    [Header("Smooth Acceleration / Deceleration")]
-    [SerializeField] private bool useSmoothTransition = true;
-    [SerializeField] private float accelerationRate = 4f;
+    [Header("Gradual Spool Up & Spool Down (Turbine Inertia)")]
+    [Tooltip("Time in seconds to gradually reach max speed from a stop.")]
+    [SerializeField] private float spoolUpTime = 5f;
+
+    [Tooltip("Time in seconds to gradually coast down to a full stop from max speed.")]
+    [SerializeField] private float spoolDownTime = 8f;
 
     private bool isSpinning = false;
     private float currentSpeedMultiplier = 0f;
@@ -45,23 +48,21 @@ public class DualTurbineFanRotator : MonoBehaviour
 
     private void Update()
     {
-        // Smooth speed interpolation
         float targetMultiplier = isSpinning ? 1f : 0f;
-        if (useSmoothTransition)
-        {
-            currentSpeedMultiplier = Mathf.MoveTowards(
-                currentSpeedMultiplier,
-                targetMultiplier,
-                Time.deltaTime * accelerationRate
-            );
-        }
-        else
-        {
-            currentSpeedMultiplier = targetMultiplier;
-        }
 
-        // Only rotate when speed is above zero
-        if (currentSpeedMultiplier > 0.001f)
+        // Choose acceleration or deceleration rate based on whether spooling up or slowing down
+        float transitionRate = isSpinning
+            ? (1f / Mathf.Max(spoolUpTime, 0.01f))
+            : (1f / Mathf.Max(spoolDownTime, 0.01f));
+
+        currentSpeedMultiplier = Mathf.MoveTowards(
+            currentSpeedMultiplier,
+            targetMultiplier,
+            Time.deltaTime * transitionRate
+        );
+
+        // Apply rotation whenever blades have momentum
+        if (currentSpeedMultiplier > 0.0001f)
         {
             float direction = reverseDirection ? -1f : 1f;
             float step = rotationSpeed * currentSpeedMultiplier * direction * Time.deltaTime;
@@ -87,7 +88,7 @@ public class DualTurbineFanRotator : MonoBehaviour
     // =========================================================
 
     /// <summary>
-    /// Starts fan rotation (can be called repeatedly).
+    /// Gradually spools the fans up to full speed over spoolUpTime.
     /// </summary>
     public void StartRotation()
     {
@@ -95,7 +96,7 @@ public class DualTurbineFanRotator : MonoBehaviour
     }
 
     /// <summary>
-    /// Stops fan rotation (can be called repeatedly).
+    /// Gradually coasts the fans down to a complete stop over spoolDownTime.
     /// </summary>
     public void StopRotation()
     {
@@ -103,7 +104,7 @@ public class DualTurbineFanRotator : MonoBehaviour
     }
 
     /// <summary>
-    /// Toggles rotation between spinning and stopped.
+    /// Toggles between spooling up and spooling down.
     /// </summary>
     public void ToggleRotation()
     {
@@ -111,7 +112,7 @@ public class DualTurbineFanRotator : MonoBehaviour
     }
 
     /// <summary>
-    /// Instantly halts rotation without decelerating.
+    /// Instantly halts rotation with zero coasting time.
     /// </summary>
     public void StopInstant()
     {
@@ -120,7 +121,7 @@ public class DualTurbineFanRotator : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates the rotation speed dynamically.
+    /// Updates the top rotation speed dynamically.
     /// </summary>
     public void SetSpeed(float newSpeed)
     {
