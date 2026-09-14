@@ -74,6 +74,12 @@ public class PageDialogueVoiceController : MonoBehaviour
         public bool hasQuiz = false;
         public QuizData quizData;
 
+        [Header("Objects Visibility On Quiz")]
+        [Tooltip("GameObjects to hide when the quiz UI appears on this page.")]
+        public GameObject[] objectsToHideOnQuiz;
+        [Tooltip("GameObjects to show when the quiz UI appears on this page.")]
+        public GameObject[] objectsToShowOnQuiz;
+
         [Header("Page Callbacks")]
         public UnityEvent onAllVoiceClipsEnded;
         public UnityEvent<int> onSingleVoiceClipEnded;
@@ -325,6 +331,23 @@ public class PageDialogueVoiceController : MonoBehaviour
         {
             if (config.targetGameObject != null)
                 config.targetGameObject.SetActive(false);
+
+            // Handle object visibility transitions on quiz arrival
+            if (config.objectsToHideOnQuiz != null)
+            {
+                foreach (GameObject obj in config.objectsToHideOnQuiz)
+                {
+                    if (obj != null) obj.SetActive(false);
+                }
+            }
+
+            if (config.objectsToShowOnQuiz != null)
+            {
+                foreach (GameObject obj in config.objectsToShowOnQuiz)
+                {
+                    if (obj != null) obj.SetActive(true);
+                }
+            }
 
             ShowQuiz(config.quizData, config.popOrigin);
         }
