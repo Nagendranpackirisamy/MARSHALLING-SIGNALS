@@ -114,6 +114,8 @@ public class PageDialogueVoiceController : MonoBehaviour
     [SerializeField] private GameObject feedbackPanel;
     [SerializeField] private TMP_Text feedbackTitleText;
     [SerializeField] private TMP_Text feedbackExplanationText;
+    [Tooltip("How many seconds the wrong answer UI remains visible before returning to the quiz.")]
+    [SerializeField] private float wrongFeedbackDuration = 3.0f;
 
     [Header("Feedback Sprite Swapping")]
     [SerializeField] private Image feedbackBgImage;
@@ -552,7 +554,7 @@ public class PageDialogueVoiceController : MonoBehaviour
         {
             SetOptionButtonsInteractable(false);
 
-            yield return new WaitForSeconds(3.0f);
+            yield return new WaitForSeconds(wrongFeedbackDuration);
 
             feedbackPanel.SetActive(false);
 
