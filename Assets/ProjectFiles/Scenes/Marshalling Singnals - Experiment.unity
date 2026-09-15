@@ -588,7 +588,7 @@ MonoBehaviour:
   popPulseSpeed: 4
   pageNumberText: {fileID: 0}
   developerIndexMode: 0
-  testing: 0
+  testing: 1
   requiresInteraction: 010101010101010101010101
   lockNavigationTillUnlocked: 
   currentIndex: 0
@@ -5931,7 +5931,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -10771,7 +10771,7 @@ MonoBehaviour:
   - pageLabel: Scene 3
     targetGameObject: {fileID: 5869188558702707082}
     titleComponent: {fileID: 1187546069}
-    titleContent: 'Turn Left '
+    titleContent: Turn Right
     textComponent: {fileID: 5193292407794507575}
     textContent: "\u201CLeft\u201D and \u201Cright\u201D in these signals are always
       described from the pilot's point of view, not the signalman's  worth calling
@@ -10792,9 +10792,9 @@ MonoBehaviour:
       - optionText: 'Straight Ahead '
         isCorrect: 0
       - optionText: Turn Left
-        isCorrect: 1
-      - optionText: Turn Right
         isCorrect: 0
+      - optionText: Turn Right
+        isCorrect: 1
       - optionText: Normal Stop
         isCorrect: 0
       correctTitle: Nice
@@ -10813,7 +10813,7 @@ MonoBehaviour:
   - pageLabel: Scene 4
     targetGameObject: {fileID: 5869188558702707082}
     titleComponent: {fileID: 1187546069}
-    titleContent: Turn Right
+    titleContent: Turn Left
     textComponent: {fileID: 5193292407794507575}
     textContent: "Turn Left and Turn Right share the same extended arm, learners
       often mix them up \u2014 this is a great spot for a side-by-side comparison
@@ -10832,11 +10832,11 @@ MonoBehaviour:
         Which signal did you just see?"
       options:
       - optionText: Turn Right
-        isCorrect: 1
+        isCorrect: 0
       - optionText: 'Straight Ahead '
         isCorrect: 0
       - optionText: Turn Left
-        isCorrect: 0
+        isCorrect: 1
       - optionText: Engine Start
         isCorrect: 0
       correctTitle: Nice
@@ -24833,7 +24833,7 @@ GameObject:
   - component: {fileID: 1230832549}
   - component: {fileID: 1230832548}
   m_Layer: 0
-  m_Name: Spline (1)
+  m_Name: 'Spline '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46527,6 +46527,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4145136577348467982, guid: c7e720d4175fcc44384926599efe4ed6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.25
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -53129,7 +53133,19 @@ MonoBehaviour:
       m_Calls: []
   OnMoveEnd:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1261761723759491311}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!1 &2033280950
 GameObject:
   m_ObjectHideFlags: 0
@@ -56208,7 +56224,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 59, y: -83.44229}
+  m_AnchoredPosition: {x: 59, y: -83.44238}
   m_SizeDelta: {x: 826.7288, y: 157.5304}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &7087425307406476704

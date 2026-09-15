@@ -12,11 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d01fd2d64a9249049aaa77d5c12a82fe, type: 3}
   m_Name: Question 2
   m_EditorClassIdentifier: 
-  questionText: Can you observe crystals on the glass rod after heating?
+  questionText: Both arms fully extended straight up, wands pointing to the sky.
+    Which signal did you just see?
   referenceImage: {fileID: 0}
-  explanationText: As you can observe, there are no crystals on the glass rod, which
-    indicates that the crystallisation point has still not been reached.
+  explanationText: "On a busy apron with several marshallers working at once, this
+    is the signal that cuts through the noise and says \u201Cover here.\u201D"
   options:
-  - Yes
-  - No
+  - ' Guide'
+  - 'Identify Gate  '
+  - Normal Stop
+  - Chock Out
   correctOptionIndex: 1

@@ -12,16 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d01fd2d64a9249049aaa77d5c12a82fe, type: 3}
   m_Name: Question 1
   m_EditorClassIdentifier: 
-  questionText: Identify the signal shown below.
+  questionText: Right hand up, left hand down. Which signal did you just see?
   referenceImage: {fileID: 0}
-  explanationText: Dilute sulphuric acid is an acid that is added to the reaction
-    mixture to prevent the hydrolysis of aluminium ions.Distilled water can not be
-    used as it will support hydrolysis The 1:1 water + alcohol mixture is used to
-    wash the crystals, and can not be used to prevent the hydrolysis of aluminum
-    ions.
+  explanationText: This signal usually comes from a wingwalker standing right at
+    the wingtip not always the head marshaller because that's the only person who
+    can actually see if the tip will clear an obstacle.
   options:
-  - Negative  Chocks Removed  Do Not Touch Controls  Hold Position / Stand-by
-  - Dilute sulphuric acid
-  - 1:1 water + alcohol mixture
-  - None of these
-  correctOptionIndex: 1
+  - Guide
+  - Identify Gate
+  - Normal Stop
+  - Chocks Inserted
+  correctOptionIndex: 0
