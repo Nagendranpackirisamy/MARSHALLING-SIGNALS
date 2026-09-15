@@ -15,6 +15,12 @@ public class RawImageCameraController : MonoBehaviour, IDragHandler, IScrollHand
     [SerializeField] private float maxYawY = 60f;
     [SerializeField] private float rotationSpeed = 0.2f;
 
+    [Header("Invert Controls")]
+    [Tooltip("Inverts the vertical (pitch) look direction.")]
+    [SerializeField] private bool invertPitch = false;
+    [Tooltip("Inverts the horizontal (yaw) look direction.")]
+    [SerializeField] private bool invertYaw = false;
+
     [Header("Zoom Limits (Camera FOV)")]
     [Tooltip("Field Of View minimum (closest zoom).")]
     [SerializeField] private float minFOV = 15f;
@@ -94,8 +100,12 @@ public class RawImageCameraController : MonoBehaviour, IDragHandler, IScrollHand
         // Ignore single-finger drag if a two-finger pinch gesture is happening
         if (Input.touchCount >= 2) return;
 
-        targetYaw += eventData.delta.x * rotationSpeed;
-        targetPitch -= eventData.delta.y * rotationSpeed;
+        // Determine axis direction based on invert flags
+        float yawMultiplier = invertYaw ? -1f : 1f;
+        float pitchMultiplier = invertPitch ? 1f : -1f;
+
+        targetYaw += eventData.delta.x * rotationSpeed * yawMultiplier;
+        targetPitch += eventData.delta.y * rotationSpeed * pitchMultiplier;
 
         targetPitch = Mathf.Clamp(targetPitch, minPitchX, maxPitchX);
         targetYaw = Mathf.Clamp(targetYaw, minYawY, maxYawY);
@@ -134,7 +144,7 @@ public class RawImageCameraController : MonoBehaviour, IDragHandler, IScrollHand
     private float NormalizeAngle(float angle)
     {
         while (angle > 180f) angle -= 360f;
-        while (angle < -180f) angle += 360f;
+        while (angle < -180f) angle -= 360f;
         return angle;
     }
 
