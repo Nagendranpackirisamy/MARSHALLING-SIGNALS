@@ -10598,6 +10598,12 @@ MonoBehaviour:
   feedbackPanel: {fileID: 3223433156570303006}
   feedbackTitleText: {fileID: 5603579780266496537}
   feedbackExplanationText: {fileID: 5922091300836402452}
+  feedbackBgImage: {fileID: 7087425307406476704}
+  feedbackIconImage: {fileID: 1080954011}
+  correctBgSprite: {fileID: 21300000, guid: 6441380aa56e54a48bbc32daa931cd6a, type: 3}
+  wrongBgSprite: {fileID: 21300000, guid: 04b8cdccdb6b4b44181ff29bdf5cdb98, type: 3}
+  correctIconSprite: {fileID: 21300000, guid: 1a0f245599b5a7143b6c75c91812d91d, type: 3}
+  wrongIconSprite: {fileID: 21300000, guid: 53a27b980ed58cb4fb629bcbccaf4cbe, type: 3}
   defaultCorrectTitle: Correct Nice
   defaultWrongTitle: "Incorrect\tClose"
   correctColor: {r: 1, g: 1, b: 1, a: 1}
@@ -10767,7 +10773,7 @@ MonoBehaviour:
   - pageLabel: Scene 3
     targetGameObject: {fileID: 5869188558702707082}
     titleComponent: {fileID: 1187546069}
-    titleContent: 'Turn Left '
+    titleContent: 'Turn Right '
     textComponent: {fileID: 5193292407794507575}
     textContent: "\u201CLeft\u201D and \u201Cright\u201D in these signals are always
       described from the pilot's point of view, not the signalman's  worth calling
@@ -10788,9 +10794,9 @@ MonoBehaviour:
       - optionText: 'Straight Ahead '
         isCorrect: 0
       - optionText: Turn Left
-        isCorrect: 1
-      - optionText: Turn Right
         isCorrect: 0
+      - optionText: Turn Right
+        isCorrect: 1
       - optionText: Normal Stop
         isCorrect: 0
       correctTitle: Nice
@@ -10809,7 +10815,7 @@ MonoBehaviour:
   - pageLabel: Scene 4
     targetGameObject: {fileID: 5869188558702707082}
     titleComponent: {fileID: 1187546069}
-    titleContent: Turn Right
+    titleContent: Turn Left
     textComponent: {fileID: 5193292407794507575}
     textContent: "Turn Left and Turn Right share the same extended arm, learners
       often mix them up \u2014 this is a great spot for a side-by-side comparison
@@ -10828,11 +10834,11 @@ MonoBehaviour:
         Which signal did you just see?"
       options:
       - optionText: Turn Right
-        isCorrect: 1
+        isCorrect: 0
       - optionText: 'Straight Ahead '
         isCorrect: 0
       - optionText: Turn Left
-        isCorrect: 0
+        isCorrect: 1
       - optionText: Engine Start
         isCorrect: 0
       correctTitle: Nice
@@ -55050,7 +55056,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1414438634760468411
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55180,7 +55186,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1924503727974548242
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -115,6 +115,14 @@ public class PageDialogueVoiceController : MonoBehaviour
     [SerializeField] private TMP_Text feedbackTitleText;
     [SerializeField] private TMP_Text feedbackExplanationText;
 
+    [Header("Feedback Sprite Swapping")]
+    [SerializeField] private Image feedbackBgImage;
+    [SerializeField] private Image feedbackIconImage;
+    [SerializeField] private Sprite correctBgSprite;
+    [SerializeField] private Sprite wrongBgSprite;
+    [SerializeField] private Sprite correctIconSprite;
+    [SerializeField] private Sprite wrongIconSprite;
+
     [Header("Global Default Feedback Titles")]
     [SerializeField] private string defaultCorrectTitle = "Correct";
     [SerializeField] private string defaultWrongTitle = "Incorrect";
@@ -455,6 +463,19 @@ public class PageDialogueVoiceController : MonoBehaviour
             quizContainer.SetActive(false);
 
         feedbackPanel.SetActive(true);
+
+        // Swap sprites for background panel and icon
+        if (feedbackBgImage != null)
+        {
+            Sprite targetBg = option.isCorrect ? correctBgSprite : wrongBgSprite;
+            if (targetBg != null) feedbackBgImage.sprite = targetBg;
+        }
+
+        if (feedbackIconImage != null)
+        {
+            Sprite targetIcon = option.isCorrect ? correctIconSprite : wrongIconSprite;
+            if (targetIcon != null) feedbackIconImage.sprite = targetIcon;
+        }
 
         if (option.isCorrect)
         {
