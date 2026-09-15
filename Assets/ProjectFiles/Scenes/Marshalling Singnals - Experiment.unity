@@ -10718,8 +10718,8 @@ MonoBehaviour:
         isCorrect: 0
       correctTitle: Nice
       wrongTitle: Close
-      correctExplanation: ' that one stuck.'
-      wrongExplanation: worth a rewatch before we move on.
+      correctExplanation: That One Stuck
+      wrongExplanation: Worth a Rewatch Before We Move On
     objectsToHideOnQuiz:
     - {fileID: 991408247}
     objectsToShowOnQuiz: []
@@ -10817,9 +10817,9 @@ MonoBehaviour:
     titleComponent: {fileID: 1187546069}
     titleContent: Turn Left
     textComponent: {fileID: 5193292407794507575}
-    textContent: "Turn Left and Turn Right share the same extended arm, learners
-      often mix them up \u2014 this is a great spot for a side-by-side comparison
-      card in the library."
+    textContent: Turn Left and Turn Right share the same extended arm, learners often
+      mix them up this is a great spot for a side-by-side comparison card in the
+      library.
     enableUIPop: 1
     popOrigin: 1
     useTypewriterEffect: 1
@@ -19129,7 +19129,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -28291,7 +28291,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -31652,7 +31652,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -32308,7 +32308,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
