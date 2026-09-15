@@ -9890,7 +9890,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ec11b7e5686ca144b954d93831a98c4a, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 943223448204509391, guid: ec11b7e5686ca144b954d93831a98c4a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -23393,14 +23393,14 @@ Camera:
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 1
+  m_projectionMatrixMode: 2
   m_GateFitMode: 2
   m_FOVAxisMode: 0
   m_Iso: 200
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 20.78461
+  m_FocalLength: 20.659513
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
@@ -23415,7 +23415,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 3000
-  field of view: 96
+  field of view: 60.3
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -23441,13 +23441,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1147446641}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.95015186, z: -0, w: 0.31178752}
-  m_LocalPosition: {x: 641.6, y: 26.4, z: -736.4}
+  m_LocalRotation: {x: 0.00024007302, y: 0.8528549, z: -0.003300899, w: -0.5221375}
+  m_LocalPosition: {x: 828.3, y: 20.9, z: -756.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -216.334, z: 0}
+  m_LocalEulerAnglesHint: {x: 0.308, y: -117.048, z: 0.221}
 --- !u!1 &1151861536
 GameObject:
   m_ObjectHideFlags: 0
@@ -24632,6 +24632,10 @@ PrefabInstance:
     - target: {fileID: 5495250973920756623, guid: 112520aae480a0244903063ffbb5b11a, type: 3}
       propertyPath: m_Name
       value: 3D Assets
+      objectReference: {fileID: 0}
+    - target: {fileID: 5522347995412236486, guid: 112520aae480a0244903063ffbb5b11a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6733999761221286668, guid: 112520aae480a0244903063ffbb5b11a, type: 3}
       propertyPath: m_IsActive
@@ -53081,7 +53085,7 @@ MonoBehaviour:
   - pageIndex: 0
     primaryTarget: {fileID: 1147446645}
     secondaryTarget: {fileID: 1553794569}
-    customMoveDuration: 6
+    customMoveDuration: 10
   - pageIndex: 7
     primaryTarget: {fileID: 983649446}
     secondaryTarget: {fileID: 1220715186}
@@ -54598,7 +54602,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1414438634760468411
 MonoBehaviour:
   m_ObjectHideFlags: 0
