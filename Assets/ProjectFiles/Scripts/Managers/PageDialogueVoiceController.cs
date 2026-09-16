@@ -134,16 +134,34 @@ public class PageDialogueVoiceController : MonoBehaviour
 
     [Header("Results & Summary Screen (Final Page)")]
     [Tooltip("Index of the final summary page in the Pages list.")]
-    [SerializeField] private int resultsPageIndex = 10;
+    [SerializeField] private int resultsPageIndex = 11;
     [SerializeField] private TMP_Text scoreRevealText;
     [SerializeField] private TMP_Text bestStreakText;
-    [SerializeField] private TMP_Text rankBadgeText;
-    [SerializeField] private TMP_Text passFailBannerText;
-    [SerializeField] private TMP_Text closingLineText;
+    [SerializeField] private TMP_Text summaryTitleText;
+    [SerializeField] private TMP_Text summaryDescriptionText;
     [SerializeField] private Button tryAgainButton;
     [SerializeField] private Button saveAndExitButton;
 
-    [Header("Scoring & Badges Settings")]
+    [Header("Editable Summary Texts")]
+    [Tooltip("Formatted with {0} as score number. Supports TextMeshPro tags.")]
+    [TextArea(2, 4)][SerializeField] private string scoreFormat = "<size=130%><b>{0}</b></size>\n<size=55%>Out of 100</size>";
+    [Tooltip("Formatted with {0} as streak number.")]
+    [SerializeField] private string bestStreakFormat = "Best Streak  <size=140%><b>{0:D2}</b></size>";
+
+    [Header("Pass State Texts")]
+    [SerializeField] private string passTitleText = "Bravo!!";
+    [TextArea(2, 4)][SerializeField] private string passDescriptionText = "You can read the ramp\nlike a pro.";
+
+    [Header("Fail State Texts")]
+    [SerializeField] private string failTitleText = "Keep Practising!";
+    [TextArea(2, 4)][SerializeField] private string failDescriptionText = "The basics are in, but take another\nlook before moving on.";
+
+    [Header("Perfect Run Bonus (Optional)")]
+    [SerializeField] private bool useSpecialPerfectText = false;
+    [SerializeField] private string perfectTitleText = "Master Marshaller!";
+    [TextArea(2, 4)][SerializeField] private string perfectDescriptionText = "Perfect run. Ten for ten — that's a real marshaller's eye.";
+
+    [Header("Scoring & Thresholds")]
     [SerializeField] private int pointsFirstTry = 10;
     [SerializeField] private int pointsSecondTry = 5;
     [SerializeField] private int pointsMultipleTries = 2;
@@ -611,58 +629,32 @@ public class PageDialogueVoiceController : MonoBehaviour
         if (quizAttemptsPerPage.Count < quizCount)
             allFirstTry = false;
 
-        // 1. Score Headline
+        // 1. Score Text (e.g., 76 on top, Out of 100 below)
         if (scoreRevealText != null)
-            scoreRevealText.text = $"{totalScore} <size=60%>/ 100</size>";
+            scoreRevealText.text = string.Format(scoreFormat, totalScore);
 
-        // 2. Best Streak
+        // 2. Best Streak Text (e.g., Best Streak 04)
         if (bestStreakText != null)
-            bestStreakText.text = $"Best streak: {bestStreak}";
+            bestStreakText.text = string.Format(bestStreakFormat, bestStreak);
 
-        // 3. Rank Badge Copy
-        if (rankBadgeText != null)
+        // 3. Left Card Text: Title & Description
+        bool isPassed = totalScore >= passingScoreThreshold;
+        bool isPerfect = allFirstTry && totalScore >= 100;
+
+        if (summaryTitleText != null)
         {
-            if (allFirstTry && totalScore >= 100)
-            {
-                rankBadgeText.text = "MASTER MARSHALLER — every signal, first try.";
-            }
-            else if (totalScore >= passingScoreThreshold)
-            {
-                rankBadgeText.text = "MARSHALLER — solid, confident signal reading.";
-            }
+            if (isPerfect && useSpecialPerfectText)
+                summaryTitleText.text = perfectTitleText;
             else
-            {
-                rankBadgeText.text = "TRAINEE — the basics are in, keep practising.";
-            }
+                summaryTitleText.text = isPassed ? passTitleText : failTitleText;
         }
 
-        // 4. Pass / Fail Banner
-        if (passFailBannerText != null)
+        if (summaryDescriptionText != null)
         {
-            if (totalScore >= passingScoreThreshold)
-            {
-                passFailBannerText.text = "✓ Passed — you can read the ramp like a pro.";
-                passFailBannerText.color = correctColor;
-            }
+            if (isPerfect && useSpecialPerfectText)
+                summaryDescriptionText.text = perfectDescriptionText;
             else
-            {
-                passFailBannerText.text = "Not quite there yet — but every signal you missed is one tap away in the Library.";
-                passFailBannerText.color = incorrectColor;
-            }
-        }
-
-        // 5. Closing Line (100% score only)
-        if (closingLineText != null)
-        {
-            if (totalScore >= 100 && allFirstTry)
-            {
-                closingLineText.gameObject.SetActive(true);
-                closingLineText.text = "Perfect run. Ten for ten — that's a real marshaller's eye.";
-            }
-            else
-            {
-                closingLineText.gameObject.SetActive(false);
-            }
+                summaryDescriptionText.text = isPassed ? passDescriptionText : failDescriptionText;
         }
     }
 
