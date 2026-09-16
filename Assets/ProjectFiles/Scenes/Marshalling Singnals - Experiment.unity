@@ -588,7 +588,7 @@ MonoBehaviour:
   popPulseSpeed: 4
   pageNumberText: {fileID: 0}
   developerIndexMode: 0
-  testing: 1
+  testing: 0
   requiresInteraction: 010101010101010101010101
   lockNavigationTillUnlocked: 
   currentIndex: 0
@@ -23971,7 +23971,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 25be9aab243e15a488aa2aed737ab71d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d33a30ffbc517014982e9a3d9b302a6f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -55432,7 +55432,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &1511555415516987299
 GameObject:
   m_ObjectHideFlags: 0
@@ -55664,7 +55664,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!222 &2556916867155405767
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -57221,7 +57221,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 833561792a64db34294cc27f9d4c8001, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 84495d600bd49634dacbe0d8b966ffb0, type: 3}
   m_Type: 3
   m_PreserveAspect: 1
   m_FillCenter: 1
