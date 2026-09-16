@@ -110,6 +110,12 @@ public class PageDialogueVoiceController : MonoBehaviour
     [SerializeField] private Button[] optionButtons = new Button[4];
     [SerializeField] private TMP_Text[] optionLabels = new TMP_Text[4];
 
+    [Header("Quiz Specific Objects Visibility")]
+    [Tooltip("GameObject that will be hidden when the quiz UI appears and restored back to active once the quiz finishes.")]
+    [SerializeField] private GameObject objectToHideOnQuiz;
+    [Tooltip("GameObject that will be shown when the quiz UI appears and restored back to inactive once the quiz finishes.")]
+    [SerializeField] private GameObject objectToShowOnQuiz;
+
     [Header("Quiz Feedback Pop-Up")]
     [SerializeField] private GameObject feedbackPanel;
     [SerializeField] private TMP_Text feedbackTitleText;
@@ -283,6 +289,10 @@ public class PageDialogueVoiceController : MonoBehaviour
     private void HandlePageChanged(int newPageIndex)
     {
         StopAllRoutines();
+
+        // Restore any quiz-hidden or quiz-shown objects back to normal when changing pages
+        SetQuizObjectsVisibility(false);
+
         activePageIndex = newPageIndex;
 
         if (postAudioContinueButton != null)
@@ -399,11 +409,36 @@ public class PageDialogueVoiceController : MonoBehaviour
             if (config.targetGameObject != null)
                 config.targetGameObject.SetActive(false);
 
+            // Hide the specified hide object and show the specified show object
+            SetQuizObjectsVisibility(true);
+
+            ShowQuiz(config.quizData, config.popOrigin);
+        }
+        else
+        {
+            PageNavigationController.RequestNavigationUnlock();
+        }
+    }
+
+    private void SetQuizObjectsVisibility(bool inQuiz)
+    {
+        // Dedicated two objects: hide one and show the other while quiz is active
+        if (objectToHideOnQuiz != null)
+            objectToHideOnQuiz.SetActive(!inQuiz);
+
+        if (objectToShowOnQuiz != null)
+            objectToShowOnQuiz.SetActive(inQuiz);
+
+        // Per-page configs if assigned
+        if (activePageIndex >= 0 && activePageIndex < pages.Count)
+        {
+            PageContentConfig config = pages[activePageIndex];
+
             if (config.objectsToHideOnQuiz != null)
             {
                 foreach (GameObject obj in config.objectsToHideOnQuiz)
                 {
-                    if (obj != null) obj.SetActive(false);
+                    if (obj != null) obj.SetActive(!inQuiz);
                 }
             }
 
@@ -411,15 +446,9 @@ public class PageDialogueVoiceController : MonoBehaviour
             {
                 foreach (GameObject obj in config.objectsToShowOnQuiz)
                 {
-                    if (obj != null) obj.SetActive(true);
+                    if (obj != null) obj.SetActive(inQuiz);
                 }
             }
-
-            ShowQuiz(config.quizData, config.popOrigin);
-        }
-        else
-        {
-            PageNavigationController.RequestNavigationUnlock();
         }
     }
 
@@ -592,6 +621,9 @@ public class PageDialogueVoiceController : MonoBehaviour
     {
         if (feedbackPanel != null) feedbackPanel.SetActive(false);
         if (quizContainer != null) quizContainer.SetActive(false);
+
+        // Bring both objects back to their normal state (unhiding the hidden one, hiding the shown one)
+        SetQuizObjectsVisibility(false);
 
         PageNavigationController.RequestNavigationUnlock();
     }
